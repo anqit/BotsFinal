@@ -1,11 +1,11 @@
 from math import *
 import csv
+from Visualizer import *
 
 
 # this is very inefficient for long lists...
 def mean(list):
     return sum(list) / float(len(list))
-
 
 def distance(point1, point2):
     """Computes distance between point1 and point2. Points are (x, y) pairs."""
@@ -13,13 +13,11 @@ def distance(point1, point2):
     x2, y2 = point2
     return sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
-
 def truncate(angle):
     """This maps all angles to a domain of [-pi, pi]"""
     while angle < 0.0:
         angle += pi * 2
     return ( (angle + pi) % (pi * 2) ) - pi
-
 
 def heading(origin, target):
     """Returns the angle, in radians, between the two points"""
@@ -34,6 +32,7 @@ class Bot:
 
         self.minx = self.miny = 1000
         self.maxx = self.maxy = 0
+        self.max_mag = 0.
 
         self.measurements = []
         self.magnitudes = []
@@ -58,7 +57,8 @@ with open("training_data.txt") as coordinates:
             p2 = bot.measurements[i + 1]
     
             magnitude = distance(p1, p2)
-    
+            bot.max_mag = max(bot.max_mag, magnitude)
+
             direction = heading(p1, p2)
     
             bot.magnitudes.append(magnitude)
@@ -94,17 +94,16 @@ for i in range(len(bot.measurements)):
     # This is where the behavior detection should go.
     placeholder = 0
 
-with open('training_data.csv', 'wb') as cvsfile:
-    write = csv.writer(cvsfile)
-    for i in range(len(bot.measurements)):
-        write.writerow( [
-            bot.measurements[i][0],
-            bot.measurements[i][1],
-            bot.magnitudes[i],
-            bot.directions[i],
-            bot.direction_deltas[i],
-        ] )
+# with open('training_data.csv', 'wb') as csvfile:
+#     write = csv.writer(csvfile)
+#     for i in range(len(bot.measurements)):
+#         write.writerow( [
+#             bot.measurements[i][0],
+#             bot.measurements[i][1],
+#             bot.magnitudes[i],
+#             bot.directions[i],
+#             bot.direction_deltas[i],
+#         ] )
 
-# the 4 corners will start in the center and move outward, like so
-# the x of a given corner is set to the x of a given point times the y weight
-# the y weight is calculated based on the y range extremes
+# show_path(bot)
+show_vectors(bot)
