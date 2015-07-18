@@ -68,6 +68,7 @@ def read_data():
     bot.directions = [None] + bot.directions
     bot.direction_deltas =  [None, None] + bot.direction_deltas
 
+    bot.set_offsets((bot.maxx - bot.minx) * .1, (bot.maxy - bot.miny) * .1)
     bot.set_zones()
 
     return bot

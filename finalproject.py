@@ -4,5 +4,5 @@ from DataIO import *
 
 bot = read_data()
 
-# show_path(bot, zones)
-show_vectors(bot)
+show_path(bot)
+# show_vectors(bot)

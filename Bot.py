@@ -8,11 +8,18 @@ class Bot:
         self.maxx = self.maxy = 0
         self.max_mag = 0.
 
+        self.offset_x = (self.maxx - self.minx) * .1
+        self.offset_y = (self.maxy - self.miny) * .1
+
         self.measurements = []
         self.magnitudes = []
         self.directions = []
         self.direction_deltas = []
         self.zones = []
+
+    def set_offsets(self, ox, oy):
+        self.offset_x = ox
+        self.offset_y = oy
 
     """
     ---------------> x
@@ -27,8 +34,9 @@ class Bot:
     \/    offset_x (ox)
     y
     """
-    def find_zone(self, data_point, ox, oy):
+    def find_zone(self, data_point):
         x, y = data_point
+        ox, oy = self.offset_x, self.offset_y
 
         if(x < self.minx + ox): # left side
             if(y < self.miny + oy): # top left corner
@@ -53,12 +61,9 @@ class Bot:
             return 5
 
     def set_zones(self):
-        offset_x = (self.maxx - self.minx) * .1
-        offset_y = (self.maxy - self.miny) * .1
-
         for i in range(len(self.measurements)):
             data_point = self.measurements[i]
-            zone = self.find_zone(data_point, offset_x, offset_y)
+            zone = self.find_zone(data_point)
             self.zones.append(zone)
 
     def print_zones(self):

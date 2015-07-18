@@ -10,11 +10,16 @@ VECTOR_DIM = 50.
 zone_color_map = ["red", "blue", "red", "blue", "green", "blue", "red", "blue", "red"]
 
 def setup(bot):
+    global scale
+    scale = get_scale(bot)
+
     turtle.setup(DIMX, DIMY)
     window = turtle.Screen()
     window.bgcolor('white')
 
     # turtle.setworldcoordinates(0, 0, DIMX, DIMY)
+
+    draw_lines(bot)
 
     b = turtle.Turtle()
     b.radians()
@@ -26,25 +31,77 @@ def setup(bot):
 
     return window, b
 
-def shift_scale(bot, index, scale):
-    x, y = bot.measurements[index]
-    x -= bot.minx # zero x's to bot.minx
-    y -= bot.miny # zero y's to bot.miny
+def draw_lines(bot):
+    ox, oy = scale_dim(bot.offset_x , bot.offset_y)
+    dx, dy = scale_dim(bot.maxx - bot.minx, bot.maxy - bot.miny)
 
-    # scale to fit in window
-    x /= scale
-    y /= scale
+    lines = turtle.Turtle()
+    lines.width(5.)
+    lines.penup()
 
-    # shift window origin to bottom left corner
+    # draw outlines
+    lines.color("black")
+    drawV(lines, 0, dy)
+    drawV(lines, dx, dy)
+    drawH(lines, 0, dx)
+    drawH(lines, dy, dx)
+
+    # draw zone lines
+    lines.penup()
+    lines.color("purple")
+    drawV(lines, ox, dy)
+    drawV(lines, dx - ox, dy)
+    drawH(lines, oy, dx)
+    drawH(lines, dy - oy, dx)
+
+# draw vertical line at x
+def drawV(trtl, x_coord, max = DIMY):
+    draw_line(trtl, (x_coord, 0), (x_coord, max))
+
+# draw horizontal line at y
+def drawH(trtl, y_coord, max = DIMX):
+    draw_line(trtl, (0, y_coord), (max, y_coord))
+
+# draw line from p1 to p2
+def draw_line(trtl, p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
+
+    trtl.penup()
+    trtl.goto(shift(x1, y1))
+    trtl.pendown()
+    trtl.goto(shift(x2, y2))
+
+    trtl.penup()
+
+def shift(x, y):
     x -= DIMX / 2.
     y -= DIMY / 2.
 
     return x, y
 
-def show_vectors(bot):
+def scale_dim(x, y):
+    x /= scale
+    y /= scale
+
+    return x, y
+
+def bot_scale_shift(x, y, bot):
+    x -= bot.minx # zero x's to bot.minx
+    y -= bot.miny # zero y's to bot.miny
+
+    # scale to fit in window
+    x, y = scale_dim(x, y)
+
+    # shift window origin to bottom left corner
+    x, y = shift(x, y)
+
+    return x, y
+
+def show_vectors(bot, granularity = 10):
     window, b = setup(bot)
 
-    for i in range(1, len(bot.magnitudes), 10):
+    for i in range(1, len(bot.magnitudes), granularity):
         draw_vector(i, b, bot)
 
     window.exitonclick()
@@ -58,8 +115,8 @@ def show_path(bot):
     window.exitonclick()
 
 def draw_vector(index, trtl, bot):
-    scale = get_scale(bot)
-    x, y = shift_scale(bot, index, scale)
+    x, y = bot.measurements[index]
+    x, y = bot_scale_shift(x, y, bot)
 
     zone = bot.zones[index]
     trtl.color(zone_color_map[zone - 1])
@@ -76,10 +133,11 @@ def draw_vector(index, trtl, bot):
     trtl.penup()
 
 def draw_point(index, trtl, bot):
-    scale = get_scale(bot)
+    x, y = bot.measurements[index]
+    x, y = bot_scale_shift(x, y, bot)
 
-    x, y = shift_scale(bot, index, scale)
-
+    zone = bot.zones[index]
+    trtl.color(zone_color_map[zone - 1])
     trtl.goto(x, y)
     trtl.pendown()
 
