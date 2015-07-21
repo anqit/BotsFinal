@@ -1,25 +1,7 @@
 import csv
-from math import *
 
+from Util import *
 import Bot
-
-def distance(point1, point2):
-    """Computes distance between point1 and point2. Points are (x, y) pairs."""
-    x1, y1 = point1
-    x2, y2 = point2
-    return sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-
-def truncate(angle):
-    """This maps all angles to a domain of [-pi, pi]"""
-    while angle < 0.0:
-        angle += pi * 2
-    return ( (angle + pi) % (pi * 2) ) - pi
-
-def heading(origin, target):
-    """Returns the angle, in radians, between the two points"""
-    ox, oy = origin
-    tx, ty = target
-    return truncate( atan2(ty - oy, tx - ox) )
 
 def read_data():
     bot = Bot.Bot()
@@ -46,6 +28,16 @@ def read_data():
                 bot.magnitudes.append(magnitude)
                 bot.directions.append(direction)
 
+            magcount = len(bot.magnitudes)
+            if magcount > 1:
+                i = magcount - 2
+
+                mag1 = bot.magnitudes[i]
+                mag2 = bot.magnitudes[i + 1]
+
+                magnitude_delta = mag2 - mag1
+                bot.magnitude_deltas.append(magnitude_delta)
+
             dcount = len(bot.directions)
             if dcount > 1:
                 i = dcount - 2
@@ -64,12 +56,14 @@ def read_data():
     print "x range : ", bot.minx, " to ", bot.maxx
     print "y range : ", bot.miny, " to ", bot.maxy
 
-    bot.magnitudes = [None] + bot.magnitudes
-    bot.directions = [None] + bot.directions
-    bot.direction_deltas =  [None, None] + bot.direction_deltas
+    bot.magnitudes = [0.] + bot.magnitudes
+    bot.directions = [0.] + bot.directions
+    bot.magnitude_deltas =  [0., 0.] + bot.magnitude_deltas
+    bot.direction_deltas =  [0., 0.] + bot.direction_deltas
 
-    bot.set_offsets((bot.maxx - bot.minx) * .1, (bot.maxy - bot.miny) * .1)
+    bot.set_offsets((bot.maxx - bot.minx) * .07, (bot.maxy - bot.miny) * .07)
     bot.set_zones()
+    bot.set_histo()
 
     return bot
 

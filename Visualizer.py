@@ -16,9 +16,10 @@ def setup(bot):
     turtle.setup(DIMX, DIMY)
     window = turtle.Screen()
     window.bgcolor('white')
+    window.colormode(255)
 
     # turtle.setworldcoordinates(0, 0, DIMX, DIMY)
-
+    turtle.tracer(10, 1)
     draw_lines(bot)
 
     b = turtle.Turtle()
@@ -36,10 +37,10 @@ def draw_lines(bot):
     dx, dy = scale_dim(bot.maxx - bot.minx, bot.maxy - bot.miny)
 
     lines = turtle.Turtle()
-    lines.width(5.)
     lines.penup()
 
     # draw outlines
+    lines.width(5.)
     lines.color("black")
     drawV(lines, 0, dy)
     drawV(lines, dx, dy)
@@ -48,6 +49,7 @@ def draw_lines(bot):
 
     # draw zone lines
     lines.penup()
+    lines.width(1.)
     lines.color("purple")
     drawV(lines, ox, dy)
     drawV(lines, dx - ox, dy)
@@ -143,3 +145,22 @@ def draw_point(index, trtl, bot):
 
 def get_scale(bot):
     return max((bot.maxx - bot.minx) / DIMX, (bot.maxy - bot.miny) / DIMY)
+
+def show_histo(bot):
+    window, b = setup(bot)
+    b.shape("square")
+    dx, dy = scale_dim(DIMX / bot.histo_x, DIMY / bot.histo_y)
+    b.shapesize(dx, dy)
+
+    H = bot.histogram
+
+    for row in range(len(H)):
+        for col in range(len(H[0])):
+            b.penup()
+            x, y = shift(col * DIMX / scale / bot.histo_x, row * DIMY / scale / bot.histo_y)
+            b.goto(x, y)
+            intensity = min(255, 255. * H[row][col] / bot.maxh + 20)
+            b.color(intensity, intensity, intensity)
+            b.stamp()
+
+    window.exitonclick()
